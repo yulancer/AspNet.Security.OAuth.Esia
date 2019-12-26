@@ -18,6 +18,8 @@ using System.Web;
 
 namespace AspNet.Security.OAuth.Esia
 {
+    using System.Text.Json;
+
     public class EsiaAuthenticationHandler : OAuthHandler<EsiaAuthenticationOptions>
     {
         public EsiaAuthenticationHandler(
@@ -97,7 +99,7 @@ namespace AspNet.Security.OAuth.Esia
                 return HandleRequestResult.Fail("Code was not found.", properties);
             }
 
-            var tokens = await ExchangeCodeAsync(code, BuildRedirectUri(Options.CallbackPath));
+            var tokens = await ExchangeCodeAsync(new OAuthCodeExchangeContext(new AuthenticationProperties(), code, BuildRedirectUri(Options.CallbackPath)));
 
             if (tokens.Error != null)
             {
@@ -155,8 +157,10 @@ namespace AspNet.Security.OAuth.Esia
             }
         }
 
-        protected override async Task<OAuthTokenResponse> ExchangeCodeAsync(string code, string redirectUri)
+        protected override async Task<OAuthTokenResponse> ExchangeCodeAsync(OAuthCodeExchangeContext context)
         {
+            string code = context.Code;
+            string redirectUri = context.RedirectUri;
             var secret = new EsiaClientSecret(Options);
             Options.ClientSecret = secret.GenerateClientSecret();
 
@@ -180,7 +184,7 @@ namespace AspNet.Security.OAuth.Esia
             var response = await Backchannel.SendAsync(request, Context.RequestAborted);
             if (response.IsSuccessStatusCode)
             {
-                var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
+                var payload = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
                 return OAuthTokenResponse.Success(payload);
             }
             else
@@ -230,13 +234,13 @@ namespace AspNet.Security.OAuth.Esia
             identity.AddClaim(new Claim(EsiaConstants.SbjIdUrn, sbjId));
 
             var uri = new Uri(Options.UserInformationEndpoint + "/" + sbjId);
-            var userInfo = await GetUserInformation(uri, tokens);
+            JsonElement userInfo = await GetUserInformation(uri, tokens);
 
             if (Options.FetchContactInfo)
             {
                 uri = new Uri(Options.UserInformationEndpoint + "/" + sbjId + "/" + EsiaConstants.ContactsUrl);
                 var userContacts = await GetUserInformation(uri, tokens);
-                userInfo.Add(userContacts.Property("elements"));
+                // userInfo.Add(userContacts.GetProperty("elements"));
             }
 
             var context = new OAuthCreatingTicketContext(new ClaimsPrincipal(identity), properties, Context, Scheme, Options, Backchannel, tokens, userInfo);
@@ -246,7 +250,7 @@ namespace AspNet.Security.OAuth.Esia
             return new AuthenticationTicket(context.Principal, context.Properties, Scheme.Name);
         }
 
-        private async Task<JObject> GetUserInformation(Uri uri, OAuthTokenResponse tokens)
+        private async Task<JsonElement> GetUserInformation(Uri uri, OAuthTokenResponse tokens)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, uri.AbsoluteUri);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokens.AccessToken);
@@ -258,7 +262,7 @@ namespace AspNet.Security.OAuth.Esia
                 throw new HttpRequestException($"An error occurred when retrieving Esia user information ({response.StatusCode}). Please check if the authentication information is correct.");
             }
 
-            return JObject.Parse(await response.Content.ReadAsStringAsync());
+            return JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
         }
 
         private static string GetSubjectId(OAuthTokenResponse tokens)
