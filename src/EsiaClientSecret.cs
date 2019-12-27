@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Security.Cryptography.Pkcs;
 using System.Text;
+using GostCryptography.Pkcs;
 
 namespace AspNet.Security.OAuth.Esia
 {
@@ -37,7 +38,7 @@ namespace AspNet.Security.OAuth.Esia
 
         private byte[] SignMessage(byte[] message)
         {
-            var signedCms = new SignedCms(new ContentInfo(message), true);
+            var signedCms = new GostSignedCms(new ContentInfo(message), true);
             var cmsSigner = new CmsSigner(Options.ClientCertificate);
             signedCms.ComputeSignature(cmsSigner);
             return signedCms.Encode();

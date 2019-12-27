@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNet.Security.OAuth.Esia", "src\AspNet.Security.OAuth.Esia.csproj", "{361F12D5-D26E-450E-BE28-022EE4692602}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestWebApplication", "TestWebApplication\TestWebApplication.csproj", "{1669FB6B-59A4-4F93-84AE-EC79772C1BA4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestWebApplication", "TestWebApplication\TestWebApplication.csproj", "{1669FB6B-59A4-4F93-84AE-EC79772C1BA4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GostCryptography", "GostCryptography\Source\GostCryptography\GostCryptography.csproj", "{1D6C3352-491F-47C2-961F-5B2639720CF8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{1669FB6B-59A4-4F93-84AE-EC79772C1BA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1669FB6B-59A4-4F93-84AE-EC79772C1BA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1669FB6B-59A4-4F93-84AE-EC79772C1BA4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D6C3352-491F-47C2-961F-5B2639720CF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D6C3352-491F-47C2-961F-5B2639720CF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D6C3352-491F-47C2-961F-5B2639720CF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D6C3352-491F-47C2-961F-5B2639720CF8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

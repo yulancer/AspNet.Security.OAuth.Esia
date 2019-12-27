@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AspNet.Security.OAuth.Esia;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
@@ -36,19 +37,7 @@ namespace TestWebApplication
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddControllersWithViews();
             services.AddRazorPages();
-            services.AddAuthentication().AddEsia(options =>
-                {
-                    options.ClientId = "xxxxxxxxx"; // идентификатор системы-клиента, обязателен
-                    options.ClientCertificate = new X509Certificate2(); // сертификат системы-клиента, обязателен
-
-                    // по умолчанию используются боевые адреса ЕСИА, можно поменять на тестовые:
-                    // options.AuthorizationEndpoint = EsiaConstants.TestAuthorizationUrl;
-                    // options.TokenEndpoint = EsiaConstants.TestAccessTokenUrl;
-                    // options.UserInformationEndpoint = EsiaConstants.TestUserInformationUrl;
-
-                    // получение контактных данных пользователя (почта, телефон), по умолчанию отключено
-                    // options.FetchContactInfo = true;
-                });
+            services.AddAuthentication().AddEsia(ConfigureEsia);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -80,6 +69,32 @@ namespace TestWebApplication
                     pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
             });
+        }
+
+        private void ConfigureEsia(EsiaAuthenticationOptions options)
+        {
+            options.ClientId = "REGRDCPIR"; // идентификатор системы-клиента, обязателен
+            options.ClientCertificate = FindClientSertificate(); // сертификат системы-клиента, обязателен
+
+            // по умолчанию используются боевые адреса ЕСИА, можно поменять на тестовые:
+            // options.AuthorizationEndpoint = EsiaConstants.TestAuthorizationUrl;
+            // options.TokenEndpoint = EsiaConstants.TestAccessTokenUrl;
+            // options.UserInformationEndpoint = EsiaConstants.TestUserInformationUrl;
+
+            // получение контактных данных пользователя (почта, телефон), по умолчанию отключено
+            // options.FetchContactInfo = true;
+        }
+
+        private X509Certificate2 FindClientSertificate()
+        {
+            // Будем искать сертификат в личном хранилище на локальной машине
+            X509Store storeMy = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            storeMy.Open(OpenFlags.OpenExistingOnly);
+            X509Certificate2Collection certColl = storeMy.Certificates.Find(X509FindType.FindBySerialNumber, "7cf9b04400010003f05d", false);
+
+            storeMy.Close();
+
+            return certColl.Count > 0 ? certColl[0] : new X509Certificate2();
         }
     }
 }

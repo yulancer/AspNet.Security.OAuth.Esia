@@ -21,4 +21,8 @@
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="4.7.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\GostCryptography\Source\GostCryptography\GostCryptography.csproj" />
+  </ItemGroup>
+
 </Project>
