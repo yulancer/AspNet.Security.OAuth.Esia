@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GostCryptography\Source\GostCryptography\GostCryptography.csproj" />
+    <ProjectReference Include="..\SignService\SignService.csproj" />
   </ItemGroup>
 
 </Project>

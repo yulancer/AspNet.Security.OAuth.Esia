@@ -29,11 +29,14 @@ namespace AspNet.Security.OAuth.Esia
             ISystemClock clock)
             : base(options, logger, encoder, clock)
         {
+            this.Logger = logger;
         }
+
+        private ILoggerFactory Logger { get; }
 
         protected override string BuildChallengeUrl(AuthenticationProperties properties, string redirectUri)
         {
-            var secret = new EsiaClientSecret(Options);
+            var secret = new EsiaClientSecret(Options, this.Logger);
             Options.ClientSecret = secret.GenerateClientSecret();
 
             var queryStrings = new Dictionary<string, string>
@@ -161,7 +164,7 @@ namespace AspNet.Security.OAuth.Esia
         {
             string code = context.Code;
             string redirectUri = context.RedirectUri;
-            var secret = new EsiaClientSecret(Options);
+            var secret = new EsiaClientSecret(Options, this.Logger);
             Options.ClientSecret = secret.GenerateClientSecret();
 
             var requestParam = new Dictionary<string, string>

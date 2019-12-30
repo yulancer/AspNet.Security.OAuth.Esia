@@ -3,20 +3,26 @@ using System.Collections.Generic;
 using System.Security.Cryptography.Pkcs;
 using System.Text;
 using GostCryptography.Pkcs;
+using Microsoft.Extensions.Logging;
+using SignService;
 
 namespace AspNet.Security.OAuth.Esia
 {
     class EsiaClientSecret
     {
-        public EsiaClientSecret(EsiaAuthenticationOptions options)
+        public EsiaClientSecret(EsiaAuthenticationOptions options, ILoggerFactory logger)
         {
             Options = options ?? throw new ArgumentNullException(nameof(options));
+
+            this.logger = logger;
 
             if (Options.ClientCertificate == null)
                 throw new ArgumentException("Client certificate must be provided.");
         }
 
         public EsiaAuthenticationOptions Options { get; }
+
+        private ILoggerFactory logger { get; }
 
         public string State { get; private set; }
         public string Timestamp { get; private set; }
@@ -38,10 +44,8 @@ namespace AspNet.Security.OAuth.Esia
 
         private byte[] SignMessage(byte[] message)
         {
-            var signedCms = new GostSignedCms(new ContentInfo(message), true);
-            var cmsSigner = new CmsSigner(Options.ClientCertificate);
-            signedCms.ComputeSignature(cmsSigner);
-            return signedCms.Encode();
+            var s = new SignServiceProvider(CspType.CryptoPro, this.logger);
+            return s.Sign(message, Options.ClientCertificate.Thumbprint);
         }
 
         private static string FormatScope(IEnumerable<string> scopes) => String.Join(" ", scopes);
